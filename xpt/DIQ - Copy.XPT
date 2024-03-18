@@ -1,0 +1,54 @@
+SEQN    Respondent sequence number
+DIQ010  Doctor told you have diabetes
+DID040  Age when first told you had diabetes
+DIQ160  Ever told you have prediabetes
+DIQ170  Ever told have health risk for diabetes
+DIQ172  Feel could be at risk for diabetes
+DIQ175A Family history
+DIQ175B Overweight
+DIQ175C Age
+DIQ175D Poor diet
+DIQ175E Race
+DIQ175F Had a baby weighed over 9 lbs. at birth
+DIQ175G Lack of physical activity
+DIQ175H High blood pressure
+DIQ175I High blood sugar
+DIQ175J High cholesterol
+DIQ175K Hypoglycemic
+DIQ175L Extreme hunger
+DIQ175M Tingling/numbness in hands or feet
+DIQ175N Blurred vision
+DIQ175O Increased fatigue
+DIQ175P Anyone could be at risk
+DIQ175Q Doctor warning
+DIQ175R Other, specify
+DIQ175S Gestational diabetes
+DIQ175T Frequent urination
+DIQ175U Thirst
+DIQ175V Craving for sweet/eating a lot of sugar
+DIQ175W Medication
+DIQ175X Polycystic ovarian syndrome
+DIQ180  Had blood tested past three years
+DIQ050  Taking insulin now
+DID060  How long taking insulin
+DIQ060U Unit of measure (month/year)
+DIQ070  Take diabetic pills to lower blood sugar
+DIQ230  How long ago saw a diabetes specialist
+DIQ240  Is there one Dr you see for diabetes
+DID250  Past year how many times seen doctor
+DID260  How often check blood for glucose/sugar
+DIQ260U Unit of measure (day/week/month/year)
+DIQ275  Past year Dr checked for A1C
+DIQ280  What was your last A1C level
+DIQ291  What does Dr say A1C should be
+DIQ300S What was your recent SBP
+DIQ300D What was your recent DBP
+DID310S What does Dr say SBP should be
+DID310D What does Dr say DBP should be
+DID320  What was most recent LDL number
+DID330  What does Dr say LDL should be
+DID341  Past year times Dr check feet for sores
+DID350  How often do you check your feet
+DIQ350U Unit of measure (day/week/month/year)
+DIQ360  Last time had pupils dilated for exam
+DIQ080  Diabetes affected eyes/had retinopathy

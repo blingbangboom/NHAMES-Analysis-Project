@@ -1,0 +1,666 @@
+---
+title: "Impact of the Dietary Patterns on Metabolic Health in relation to Medical Conditions: Analysis of NHANES Datasets from 2003 to 2016"
+author: "Charles Zhang"
+date: "2024-03-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(haven)
+fasted_hours <- 12
+
+#2015 - 2016 done
+N2015_demographics <- read_xpt("xpt/2015/DEMO.xpt")
+N2015_nutrition_day1 <- read_xpt("xpt/2015/DR1TOT.xpt")
+N2015_insulin <- read_xpt("xpt/2015/INS.xpt")
+N2015_cardio <- read_xpt("xpt/2015/CDQ.xpt")
+N2015_diabetes <- read_xpt("xpt/2015/DIQ.xpt")
+N2015_medical_conditions <- read_xpt("xpt/2015/MCQ.xpt")
+N2015_fasting <- read_xpt("xpt/2015/FASTQX.xpt")
+N2015_bloodquestions <- read_xpt("xpt/2015/BPQ.xpt")
+N2015_bodymeasures <- read_xpt("xpt/2015/BMX.xpt")
+N2015_bloodpressure <- read_xpt("xpt/2015/BPX.xpt")
+N2015 <- reduce(list(N2015_demographics, N2015_nutrition_day1, N2015_insulin, N2015_cardio, N2015_diabetes, N2015_medical_conditions, N2015_fasting, N2015_bloodquestions, N2015_bodymeasures, N2015_bloodpressure), full_join, by = "SEQN")
+F2015 <- N2015 %>% filter(PHAFSTHR.y > fasted_hours)
+
+#2011 - 2012 done
+N2011_demographics <- read_xpt("xpt/2011/DEMO.xpt")
+N2011_nutrition_day1 <- read_xpt("xpt/2011/DR1TOT.xpt")
+N2011_insulin <- read_xpt("xpt/2011/GLU.xpt")
+N2011_cardio <- read_xpt("xpt/2011/CDQ.xpt")
+N2011_diabetes <- read_xpt("xpt/2011/DIQ.xpt")
+N2011_medical_conditions <- read_xpt("xpt/2011/MCQ.xpt")
+N2011_fasting <- read_xpt("xpt/2011/FASTQX.xpt")
+N2011_bloodquestions <- read_xpt("xpt/2011/BPQ.xpt")
+N2011_bodymeasures <- read_xpt("xpt/2011/BMX.xpt")
+N2011_bloodpressure <- read_xpt("xpt/2011/BPX.xpt")
+N2011 <- reduce(list(N2011_demographics, N2011_nutrition_day1, N2011_insulin, N2011_cardio, N2011_diabetes, N2011_medical_conditions, N2011_fasting, N2011_bloodquestions, N2011_bodymeasures, N2011_bloodpressure), full_join, by = "SEQN")
+F2011 <- N2011 %>% filter(PHAFSTHR.y > fasted_hours)
+
+#2007 - 2008 done
+N2007_demographics <- read_xpt("xpt/2007/DEMO.xpt")
+N2007_nutrition_day1 <- read_xpt("xpt/2007/DR1TOT.xpt")
+N2007_insulin <- read_xpt("xpt/2007/GLU.xpt")
+N2007_cardio <- read_xpt("xpt/2007/CDQ.xpt")
+N2007_diabetes <- read_xpt("xpt/2007/DIQ.xpt")
+N2007_medical_conditions <- read_xpt("xpt/2007/MCQ.xpt")
+N2007_fasting <- read_xpt("xpt/2007/FASTQX.xpt")
+N2007_bloodquestions <- read_xpt("xpt/2007/BPQ.xpt")
+N2007_bodymeasures <- read_xpt("xpt/2007/BMX.xpt")
+N2007_bloodpressure <- read_xpt("xpt/2007/BPX.xpt")
+N2007 <- reduce(list(N2007_demographics, N2007_nutrition_day1, N2007_insulin, N2007_cardio, N2007_diabetes, N2007_medical_conditions, N2007_fasting, N2007_bloodquestions, N2007_bodymeasures, N2007_bloodpressure), full_join, by = "SEQN")
+F2007 <- N2007 %>% filter(PHAFSTHR.y > fasted_hours)
+
+#2003 - 2004 done
+N2003_demographics <- read_xpt("xpt/2003/DEMO.xpt")
+N2003_nutrition_day1 <- read_xpt("xpt/2003/DR1TOT.xpt")
+N2003_insulin <- read_xpt("xpt/2003/L10AM.xpt")
+N2003_cardio <- read_xpt("xpt/2003/CDQ.xpt")
+N2003_diabetes <- read_xpt("xpt/2003/DIQ.xpt")
+N2003_medical_conditions <- read_xpt("xpt/2003/MCQ.xpt")
+N2003_fasting <- read_xpt("xpt/2003/PH.xpt")
+N2003_bloodquestions <- read_xpt("xpt/2003/BPQ.xpt")
+N2003_bodymeasures <- read_xpt("xpt/2003/BMX.xpt")
+N2003_bloodpressure <- read_xpt("xpt/2003/BPX.xpt")
+N2003 <- reduce(list(N2003_demographics, N2003_nutrition_day1, N2003_insulin, N2003_cardio, N2003_diabetes, N2003_medical_conditions, N2003_fasting, N2003_bloodquestions, N2003_bodymeasures, N2003_bloodpressure), full_join, by = "SEQN")
+F2003 <- N2003 %>% filter(PHAFSTHR > fasted_hours)
+```
+
+# Abstract
+
+The National Health and Nutrition Examination Survey (NHANES) provides critical insights into the health and nutritional status of the U.S. population. This project leverages data from four NHANES cycles (2003-2004, 2007-2008, 2011-2012, 2015-2016) to explore the relationships between dietary nutrition, insulin levels, and health outcomes, including cardiovascular disease, cancer risk and diabetes. By analyzing datasets capturing detailed dietary intake, insulin measurements, self-reported medical conditions, and fasting intervals, this study aims to investigate the impact of nutrition on metabolic health and disease risk over time. Specifically, it examines the association of dietary habits, characterized by sugar and fiber intake, with insulin levels and cardiovascular health, employing predictive modeling to identify key predictors of health outcomes. This project hypothesizes that diets high in sugar and low in fiber are significantly associated with adverse health effects, such as increased insulin levels and a higher risk of cardiovascular diseases. Through comprehensive data analysis, it seeks to validate these hypotheses and contribute to the development of informed public health interventions and dietary guidelines.
+
+# Introduction
+
+## Background
+
+The National Health and Nutrition Examination Survey (NHANES) serves as a pivotal source of data for assessing the health and nutritional status of the adult and child populations in the United States. By integrating interviews with physical examinations, NHANES provides comprehensive insights into various health indicators, including nutritional intake, metabolic markers, cardiovascular health, and more. The NHANES data cycles offers a rich dataset for exploring the multifaceted interactions between lifestyle factors and health outcomes through a prolonged period to analyze American health outcomes.
+
+## Dataset and Measurements
+
+This project utilizes several key datasets from four NHANES cycles (2003-2004, 2007-2008, 2011-2012, 2015-2016), each of these datasets offering unique measurements critical for understanding health outcomes:
+
+-   **Nutrition Day 1** (DR1TOT.XPT): Capture detailed dietary intake information, including macro nutrients and micro nutrients, to analyze dietary patterns and their health implications.
+
+-   **Insulin** (INS.XPT, L10AM.XPT, GLU.XPT): Contains measurements of fasting insulin levels, indicative of metabolic function and insulin resistance.
+
+    -   Participants aged 12 years and older were eligible.
+
+-   **Cardiovascular Disease** (CDQ.XPT): Contains self-reported data on cardiovascular health conditions, including history of heart attacks, strokes, and other related conditions.
+
+    -   Participants older than 40 were eligible.
+
+-   **Diabetes** (DIQ.XPT): Offers information on diabetes status, including diagnosis history and treatment modalities.
+
+    -   Participants aged 1 year and older were eligible.
+
+-   **Medical Conditions** (MCQ.XPT): Encompasses a broad range of self-reported medical conditions beyond cardiovascular and metabolic diseases, providing a holistic view of individual health status.
+
+-   **Fasting Intervals** (PH.XPT, FASTQX.XPT): Includes fasting data of each participant before survey. This data will be used to ensure accuracy of base insulin levels at above 12 fasting hours.
+
+## Objectives
+
+Using the detailed data provided by these datasets, this project aims to:
+
+-   Investigate the associations between dietary patterns (as documented in the Nutrition Day 1 and Day 2 surveys) and insulin levels, exploring the impact of nutrition on metabolic health through 4 year intervals periods from 2003 to 2015.
+-   Examine how dietary habits and insulin levels relate to cardiovascular disease, diabetes and cancer risk.
+-   Utilize predictive modeling techniques to identify significant predictors of cardiovascular health outcomes and other metabolic conditions, potentially guiding public health interventions and dietary guidelines.
+
+## Hypothesis
+
+Based on preliminary insights from the literature and the comprehensive data provided by NHANES, we hypothesize that dietary patterns characterized by high sugar intake and low fiber consumption are significantly associated with adverse health outcomes, such as elevated insulin levels and increased cardiovascular disease risk. This project seeks to validate these hypotheses through detailed data analysis and modeling.
+
+# Exploratory Analysis
+
+```{r echo=FALSE, results='hide',message=FALSE}
+# All Ages
+F2003_filtered <- F2003 #%>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 35)
+F2007_filtered <- F2007 #%>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 35)
+F2011_filtered <- F2011 #%>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 35)
+F2015_filtered <- F2015 #%>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 35)
+
+F2003_filtered$Year <- "2003-2004"
+F2007_filtered$Year <- "2007-2008"
+F2011_filtered$Year <- "2011-2012"
+F2015_filtered$Year <- "2015-2016"
+
+combined_data <- bind_rows(F2003_filtered, F2007_filtered, F2011_filtered, F2015_filtered)
+
+ggplot(combined_data, aes(x = DR1TSUGR, fill = Year)) +
+  geom_histogram(binwidth = 5, alpha = 0.6, position = "identity") +
+  facet_wrap(~Year, scales = "fixed") +
+  labs(title = "Histogram of Sugar Intake by Survey Cycle",
+       x = "Total Sugar Intake (gm)",
+       y = "Frequency")
+ggplot(combined_data, aes(x = LBXIN, fill = Year)) +
+  geom_histogram(binwidth = 5, alpha = 0.6, position = "identity") +
+  facet_wrap(~Year, scales = "fixed") +
+  labs(title = "Histogram of Insulin Levels by Survey Cycle",
+       x = "Insulin Levels (uU/mL)",
+       y = "Frequency")
+ggplot(combined_data, aes(x = DR1TFIBE, fill = Year)) +
+  geom_histogram(binwidth = 5, alpha = 0.6, position = "identity") +
+  facet_wrap(~Year, scales = "fixed") +
+  labs(title = "Histogram of Dietary Fiber Intake by Survey Cycle",
+       x = "Total Dietary Fiber Intake (gm)",
+       y = "Frequency")
+```
+
+```{r echo=FALSE, results='hide',message=FALSE}
+sugar_cd <- combined_data %>% filter(DR1TSUGR < 500)
+anova_sugar <- aov(DR1TSUGR ~ Year, data = combined_data)
+summary(anova_sugar)
+ggplot(sugar_cd, aes(x = Year, y = DR1TSUGR, fill = Year)) +
+  geom_boxplot() +
+  labs(title = "Sugar Intake by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Sugar Intake (gm)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+
+ins_cd <- combined_data %>% filter(LBXIN < 100)
+anova_insulin <- aov(LBXIN ~ Year, data = combined_data)
+summary(anova_insulin)
+ggplot(ins_cd, aes(x = Year, y = LBXIN, fill = Year)) +
+  geom_boxplot() +
+  labs(title = "Insulin Levels by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Insulin Levels (uU/mL)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+
+fb_cd <- combined_data %>% filter(DR1TFIBE < 50)
+anova_fiber <- aov(DR1TFIBE ~ Year, data = combined_data)
+summary(anova_fiber)
+ggplot(fb_cd, aes(x = Year, y = DR1TFIBE, fill = Year)) +
+  geom_boxplot() +
+  labs(title = "Dietary Fiber Intake by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Dietary Fiber Intake (gm)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+```
+
+## ANOVA of Dietary Nutrition across Survey Cycles
+
+This analysis shows differences between sugar intake, fiber intake, and insulin levels between years.
+
+**Sugar Intake** (DR1TSUGR)
+
+-   F value: The F value shows strong statistical evidence that the means are different from each cycle.
+
+-   P-value: The p-value is less than 2e-16, which is much smaller than the typical alpha level of 0.05. This indicates that we can reject the null hypothesis. This means group means are statistically significant in the differences in mean sugar intake across different survey cycles.
+
+-   The median sugar intake appears to have decreased over time.
+
+-   There is a noticeable decrease in the IQR over the years which could be interpreted as a trend towards more uniform sugar consumption patterns before a health survey.
+
+-   The number of outliers is substantial across all cycles, suggesting that while the general trend may be decreasing, there are still many instances of very high sugar intake.
+
+**Insulin Levels** (LBXIN)
+
+-   F value: An F value of 18.69 also indicates a strong statistical evidence that the means are different from each cycle.
+
+-   P-value: With a p-value of approximately 4.93e-12, this is again significantly smaller than 0.05, suggesting that the mean insulin levels significantly differ across the survey cycles.
+
+-   The median insulin levels also seem to be decreasing over the years.
+
+-   The IQR is similarly shrinking over time, although not as pronounced as in the sugar intake data.
+
+-   There are fewer outliers compared to sugar intake, but still a significant number, which might suggest individual differences in insulin levels not accounted for by survey cycle alone.
+
+**Dietary Fiber Intake** (DR1TFIBE)
+
+-   F value: The F value is 3.708 show that the means are different from each cycle, although this one is less strong.
+
+-   P-value: The p-value is 0.0111, which is less than 0.05 but not as small as the p-values for sugar and insulin. This means that there are statistically significant differences in dietary fiber intake across the survey cycles, though the evidence is not as strong as for sugar and insulin.
+
+-   The median dietary fiber intake does not show a clear trend over the years.
+
+-   The IQR is variable but does not change consistently across cycles.
+
+-   There are outliers, indicating some individuals have a much higher intake of dietary fiber than average.
+
+```{r echo=FALSE, results='hide',message=FALSE}
+high_insulin_data <- combined_data %>%
+  filter(!is.na(LBXIN), LBXIN > 25, !is.na(DR1TFIBE))
+
+average_fiber_by_year_high_insulin <- high_insulin_data %>%
+  group_by(Year) %>%
+  summarise(Mean_Fiber_Intake = mean(DR1TFIBE, na.rm = TRUE))
+print(average_fiber_by_year_high_insulin)
+
+ggplot(average_fiber_by_year_high_insulin, aes(x = Year, y = Mean_Fiber_Intake, fill = Year)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Avg. Dietary Fiber Intake for Individuals with High Insulin Levels by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Average Dietary Fiber Intake (gm)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+ggplot(high_insulin_data, aes(x = DR1TFIBE, y = LBXIN)) +
+  geom_point(aes(color = Year), alpha = 0.6) +  # Color points by Year
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Add a linear regression line
+  labs(title = "Dietary Fiber Intake vs. Insulin Levels",
+       subtitle = "For Individuals with Insulin Levels > 25 uU/mL",
+       x = "Dietary Fiber Intake (gm)",
+       y = "Insulin Levels (uU/mL)")
+fiber_insulin_lm <- lm(LBXIN ~ DR1TFIBE, data = high_insulin_data)
+summary(fiber_insulin_lm)
+
+```
+
+## Analysis of Fiber intake and Insulin levels
+
+This analysis focuses on the relationship between dietary fiber intake and insulin levels in individuals with higher than average insulin levels, defined here as greater than 25 uU/mL. Two visualizations are provided along with summary statistics and a linear regression analysis to explore this relationship over several survey cycles from 2003 to 2016.
+
+### Bar Chart
+
+-   The bar chart displays the average dietary fiber intake for individuals with high insulin levels across four survey cycles.
+-   Average intake appears relatively stable over the first three cycles (2003-2012), with a slight increase in 2011-2012, followed by a decrease in 2015-2016.
+-   The years 2003-2004 and 2007-2008 show very similar average fiber intakes. There's a peak in 2011-2012, which could suggest an increase in awareness or dietary changes in that period. However, in 2015-2016, the average intake drops below the levels of 2003-2004.
+
+### Scatter Plot
+
+-   The scatter plot visualizes individual data points of fiber intake and insulin levels, colored by survey cycle year.
+-   A linear regression line is included to show the overall small downward trend.
+-   The data points do not indicate a strong visual correlation between fiber intake and insulin levels; the linear regression line is almost horizontal, suggesting little to no slope.
+
+### Linear Regression Analysis
+
+-   The p-value for dietary fiber intake (0.567) suggests no statistical significance, and the very low R-squared value (0.001177) suggests that dietary fiber intake explains almost none of the variability in insulin levels.
+-   The regression analysis suggests that for individuals with already high insulin levels, the amount of dietary fiber consumed does not significantly impact insulin levels.
+
+```{r echo=FALSE, results='hide',message=FALSE}
+calculate_means <- function(data, year) {
+  data %>%
+    summarise(
+      Year = year,
+      Mean_Insulin = mean(LBXIN, na.rm = TRUE),
+      Mean_Sugar = mean(DR1TSUGR, na.rm = TRUE),
+      Mean_Carbohydrates = mean(DR1TCARB, na.rm = TRUE),
+      Mean_Dietary_Fiber = mean(DR1TFIBE, na.rm = TRUE)
+    )
+}
+
+mean_F2003 <- calculate_means(F2003_filtered, "2003-2004")
+mean_F2007 <- calculate_means(F2007_filtered, "2007-2008")
+mean_F2011 <- calculate_means(F2011_filtered, "2011-2012")
+mean_F2015 <- calculate_means(F2015_filtered, "2015-2016")
+
+mean_levels <- bind_rows(mean_F2003, mean_F2007, mean_F2011, mean_F2015)
+
+mean_levels_long <- pivot_longer(
+  mean_levels,
+  cols = c(Mean_Insulin, Mean_Sugar, Mean_Carbohydrates, Mean_Dietary_Fiber),
+  names_to = "Variable",
+  values_to = "Value"
+)
+
+carbs_sugar_data <- mean_levels_long %>%
+  filter(Variable %in% c("Mean_Carbohydrates", "Mean_Sugar"))
+fiber_insulin_data <- mean_levels_long %>%
+  filter(Variable %in% c("Mean_Dietary_Fiber", "Mean_Insulin"))
+
+ggplot(carbs_sugar_data, aes(x = Year, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  scale_fill_brewer(palette = "Pastel1", direction = 1, name = "Variable") +
+  labs(title = "Average Carbohydrates and Sugar Levels by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Average Level") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggplot(fiber_insulin_data, aes(x = Year, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  scale_fill_brewer(palette = "Set3", direction = 1, name = "Variable") +
+  labs(title = "Average Dietary Fiber and Insulin Levels by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Average Level") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+percent_sugar_to_carbs <- mean_levels %>%
+  mutate(
+    Percent_Sugar_To_Carbs = (Mean_Sugar / Mean_Carbohydrates) * 100
+  ) %>%
+  select(Year, Percent_Sugar_To_Carbs)
+ggplot(percent_sugar_to_carbs, aes(x = Year, y = Percent_Sugar_To_Carbs)) +
+  geom_col(fill = "skyblue") +
+  geom_text(aes(label = sprintf("%.2f%%", Percent_Sugar_To_Carbs)), vjust = 2) +
+  labs(title = "Percentage of Sugar to Carbohydrates by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Percentage of Sugar to Carbohydrates") +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
+
+mean_levels_ins_carbs <- mean_levels %>%
+  mutate(
+    NonSugar_Carbs = Mean_Carbohydrates - Mean_Sugar, # Calculate non-sugar carbs
+    Percent_NonSugar_Carbs = (NonSugar_Carbs / Mean_Carbohydrates) * 100, # Calculate percentage
+    Insulin_Range = max(Mean_Insulin) + min(Mean_Insulin),
+    Insulin_Percent = (Mean_Insulin / Insulin_Range) * 100
+  )
+ggplot(mean_levels_ins_carbs) +
+  geom_bar(aes(x = Year, y = Percent_NonSugar_Carbs, fill = "Percent Non-Sugar Carbs"), stat = "identity", position = "dodge") +
+  geom_line(aes(x = Year, y = Insulin_Percent, group = 1, color = "Scaled Insulin"), size = 1) +
+  geom_point(aes(x = Year, y = Insulin_Percent, color = "Scaled Insulin"), size = 2) +
+  scale_fill_manual(name = "", values = "skyblue") +
+  scale_color_manual(name = "", values = "red") +
+  labs(title = "Non-Sugar Carbohydrates Percentage and Scaled Insulin Levels by Survey Cycle",
+       x = "Survey Cycle",
+       y = "Percentage / Scaled Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = guide_legend(override.aes = list(color = "skyblue")), color = guide_legend(override.aes = list(fill = "red")))
+```
+
+## Analysis Carbohydrates and Sugar Levels with Insulin levels
+
+### Average Carbohydrates and Sugar Levels
+
+-   Throughout the survey cycles, the average carbohydrate intake consistently remains higher than the average sugar intake.
+-   There is a visible downward trend in both carbohydrate and sugar intake, with the largest decrease apparent in sugar from the first to the last survey cycle.
+
+### Average Dietary Fiber and Insulin Levels
+
+-   Average insulin levels exhibit a slight decrease over the survey cycles, whereas the average dietary fiber intake appears more stable with some variation.
+
+### Percentage of Sugar to Carbohydrates
+
+-   There is a consistent decrease in the proportion of sugar to total carbohydrates, suggesting a possible improvement in dietary quality or changes in dietary guidelines and public health initiatives over time.
+
+### Non-Sugar Carbohydrates Percentage and Scaled Insulin Levels
+
+-   A general increase in the percentage of non-sugar carbohydrates is observed, while the trend line for scaled insulin levels also shows an upward trajectory.
+-   The parallel increase might suggest a correlation between higher non-sugar carbohydrate consumption and insulin levels. With the exploratory analysis of the sugar and carbohydrates, there is an apparent positive increasing relationship between non-sugar carbohydrate dietary consumption and rising insulin levels.
+
+```{r echo=FALSE, results='hide',message=FALSE}
+combined_data_for_test <- combined_data %>%
+  filter(!is.na(DR1TSUGR), !is.na(LBXIN), !is.na(DR1TFIBE), !is.na(MCQ220), !is.na(DIQ010), !is.na(CDQ008)) %>%
+  mutate(High_Insulin = ifelse(LBXIN > 25, 1, 0))
+ggplot(combined_data_for_test, aes(x = DR1TSUGR, fill = as.factor(MCQ220))) +
+  geom_histogram(alpha = 0.6, position = "identity") +
+  facet_wrap(~MCQ220, scales = "free_y") +
+  labs(title = "Histogram of Sugar Intake by Cancer Report",
+       x = "Total Sugar Intake (gm)", y = "Frequency")
+combined_data_for_test$Cancer_Diagnosis <- factor(combined_data_for_test$MCQ220, levels = c(1, 2), labels = c("Diagnosed", "Not Diagnosed"))
+
+ggplot(combined_data, aes(x = DR1TSUGR, y = LBXIN, color = MCQ220)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Sugar Intake vs Fasted Insulin Levels by Cancer Diagnosis",
+       x = "Sugar Intake (gm)",
+       y = "Fasted Insulin Levels (uU/mL)",
+       color = "Cancer Diagnosis") +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1))
+ggplot(combined_data_for_test, aes(x = DR1TSUGR, fill = Cancer_Diagnosis)) +
+  geom_histogram(alpha = 0.6, binwidth = 10, position = "identity") +
+  facet_wrap(~Cancer_Diagnosis, scales = "free_y", ncol = 1) +
+  labs(title = "Histogram of Sugar Intake by Cancer Diagnosis",
+       x = "Sugar Intake (gm)",
+       y = "Frequency") +
+  scale_fill_brewer(palette = "Set1", name = "Cancer Diagnosis") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
+ggplot(combined_data_for_test, aes(x = LBXIN, fill = Cancer_Diagnosis)) +
+  geom_histogram(alpha = 0.6, binwidth = 5, position = "identity") +
+  facet_wrap(~Cancer_Diagnosis, scales = "free_y", ncol = 1) +
+  labs(title = "Histogram of Fasted Insulin Levels by Cancer Diagnosis",
+       x = "Fasted Insulin Levels (uU/mL)",
+       y = "Frequency") +
+  scale_fill_brewer(palette = "Set1", name = "Cancer Diagnosis") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
+
+combined_data_for_test$CDQ008_factor <- factor(combined_data_for_test$CDQ008, levels = c(1, 2), labels = c("Yes", "No"))
+
+ggplot(combined_data_for_test, aes(x = LBXIN, fill = CDQ008_factor)) +
+  geom_histogram(position = "identity", alpha = 0.6, binwidth = 5) +
+  scale_fill_manual(values = c("Yes" = "red", "No" = "blue")) +
+  labs(title = "Base Insulin Levels by Severe Chest Pain Report",
+       x = "Base Insulin Levels (uU/mL)",
+       y = "Frequency",
+       fill = "Severe Chest Pain") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
+
+```
+
+## Fasted insulin levels and cancer diagnosis
+
+From a visual analysis, the participants who had been diagnosed has higher insulin levels than their non diagnosed counterparts. This observation might suggest a correlation between higher insulin levels and cancer diagnosis.
+
+```{r echo=FALSE, results='hide',message=FALSE}
+cleaned_data <- combined_data %>%
+  filter(!is.na(LBXIN) & !is.na(MCQ220))
+cleaned_data$Cancer_Binary <- ifelse(cleaned_data$MCQ220 == 1, 1, 0)
+logit_model_clean <- glm(Cancer_Binary ~ LBXIN, data = cleaned_data, family = binomial)
+cleaned_data$Predicted_Prob <- predict(logit_model_clean, type = "response")
+logit_model <- glm(Cancer_Binary ~ LBXIN, data = cleaned_data, family = binomial)
+
+summary(logit_model)
+cleaned_data$Predicted_Prob <- predict(logit_model, type = "response")
+
+cleaned_data$Cancer_Status <- factor(cleaned_data$MCQ220, levels = c(1, 2), labels = c("Cancer", "No Cancer"))
+cleaned_data$Diabetes_Status <- factor(cleaned_data$DIQ010, levels = c(1, 2), labels = c("Diabetes", "No Diabetes"))
+means_cancer <- cleaned_data %>%
+  group_by(Cancer_Status) %>%
+  summarise(
+    Mean_Fiber = mean(DR1TFIBE, na.rm = TRUE),
+    Mean_Carbs = mean(DR1TCARB, na.rm = TRUE)
+  )
+means_diabetes <- cleaned_data %>%
+  group_by(Diabetes_Status) %>%
+  summarise(
+    Mean_Fiber = mean(DR1TFIBE, na.rm = TRUE),
+    Mean_Carbs = mean(DR1TCARB, na.rm = TRUE)
+  )
+
+ggplot(cleaned_data, aes(x = DR1TCARB, y = DR1TFIBE, color = Cancer_Status)) +
+  geom_point(alpha = 0.6) +
+  scale_color_manual(values = c("Cancer" = "red", "No Cancer" = "blue")) +
+  labs(title = "Dietary Fiber vs. Carbohydrates by Cancer Diagnosis",
+       x = "Dietary Carbohydrates (gm)",
+       y = "Dietary Fiber (gm)",
+       color = "Cancer Diagnosis") +
+  geom_vline(data = means_cancer, aes(xintercept = Mean_Carbs, color = Cancer_Status), linetype = "dashed") +
+  geom_hline(data = means_cancer, aes(yintercept = Mean_Fiber, color = Cancer_Status), linetype = "dashed") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
+ggplot(cleaned_data, aes(x = DR1TCARB, y = DR1TFIBE, color = Diabetes_Status)) +
+  geom_point(alpha = 0.6) +
+  scale_color_manual(values = c("Diabetes" = "red", "No Diabetes" = "blue")) +
+  labs(title = "Dietary Fiber vs. Carbohydrates by Diabetes Diagnosis",
+       x = "Dietary Carbohydrates (gm)",
+       y = "Dietary Fiber (gm)",
+       color = "Diabetes Diagnosis") +
+  geom_vline(data = means_diabetes, aes(xintercept = Mean_Carbs, color = Diabetes_Status), linetype = "dashed") +
+  geom_hline(data = means_diabetes, aes(yintercept = Mean_Fiber, color = Diabetes_Status), linetype = "dashed") +
+theme_minimal() +
+theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
+
+
+```
+
+## Analysis of Carbohydrates to Fiber intake (gm) in comparison to cancer and diabetes diagnoses
+
+Most of the data points are clustered at the lower end of both carbohydrate and dietary fiber intake, with the concentration of non-diabetic (blue) points being particularly dense. There is a visible scattering of diabetic (red) points throughout, but these do not appear to form a distinct pattern from the non-diabetic points, which may suggest that based on this day's data alone, there isn't a clear differentiation in carbohydrate or fiber intake between the two groups in correlation with either cancer or diabetes. My conclusion is that the data from dietary sugar and fiber intake may not be a total accurate representation of the average diet and accurate predictor of cancer or diabetes as the data is taken on a singular day and not a representation of the overall diet.
+
+# Data Integration and Processing
+
+```{r echo=FALSE, results='hide',message=FALSE}
+# Filtering Ages between 18 and 80
+F2003_filtered <- F2003 %>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 80)
+F2007_filtered <- F2007 %>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 80)
+F2011_filtered <- F2011 %>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 80)
+F2015_filtered <- F2015 %>% filter(RIDAGEYR >= 18 & RIDAGEYR <= 80)
+
+CF_data <- bind_rows(F2003_filtered, F2007_filtered, F2011_filtered, F2015_filtered)
+
+summary(CF_data$RIDAGEYR)
+hist(CF_data$RIDAGEYR)
+
+CF_data <- CF_data %>% filter(MCQ220 <= 3)
+CF_data <- CF_data %>% filter(DIQ010 <= 3)
+CF_data <- CF_data %>% filter(CDQ010 <= 3)
+CF_data <- CF_data %>% filter(BPQ020 <= 3)
+CF_data <- CF_data %>% filter(MCQ160A <= 3)
+CF_data <- CF_data %>% filter(MCQ010 <= 3)
+CF_data$MCQ220 <- ifelse(CF_data$MCQ220 == 2, 0, CF_data$MCQ220)
+CF_data$DIQ010 <- ifelse(CF_data$DIQ010 == 3, 1, CF_data$DIQ010)
+CF_data$CDQ010 <- ifelse(CF_data$CDQ010 == 2, 0, CF_data$CDQ010)
+CF_data$MCQ160A <- ifelse(CF_data$MCQ160A == 2, 0, CF_data$MCQ160A)
+CF_data$BPQ020 <- ifelse(CF_data$BPQ020 == 2, 0, CF_data$BPQ020)
+CF_data$MCQ010 <- ifelse(CF_data$MCQ010 == 2, 0, CF_data$MCQ010)
+
+CF_data <- select(CF_data, DR1TSUGR, LBXIN, DR1TFIBE, CDQ010, BPQ020, MCQ220, MCQ160A, MCQ010, DMDEDUC2, RIAGENDR, DIQ010)
+
+CF_data$DR1TSUGR<-as.integer(CF_data$DR1TSUGR);class(CF_data$DR1TSUGR)
+CF_data$LBXIN<-as.integer(CF_data$LBXIN);class(CF_data$LBXIN)
+CF_data$DR1TFIBE<-as.integer(CF_data$DR1TFIBE);class(CF_data$DR1TFIBE)
+CF_data$CDQ010<-as.factor(CF_data$CDQ010);class(CF_data$CDQ010)
+CF_data$BPQ020<-as.factor(CF_data$BPQ020);class(CF_data$BPQ020)
+CF_data$MCQ220<-as.factor(CF_data$MCQ220);class(CF_data$MCQ220)
+CF_data$MCQ160A<-as.factor(CF_data$MCQ160A);class(CF_data$MCQ160A)
+CF_data$MCQ010<-as.factor(CF_data$MCQ010);class(CF_data$MCQ010)
+CF_data$DMDEDUC2<-as.integer(CF_data$DMDEDUC2);class(CF_data$DMDEDUC2)
+CF_data$RIAGENDR<-as.factor(CF_data$RIAGENDR);class(CF_data$RIAGENDR)
+CF_data$DIQ010<-as.factor(CF_data$DIQ010);class(CF_data$DIQ010)
+str(CF_data)
+```
+
+The histogram shows the distribution of selected surveyees from 18 to 80 that will be used for our prediction models.
+
+## Integration and Data formatting
+
+For our analysis, the results needs consistent, the parameters to measure baseline insulin levels is making sure fasting hours (PHAFSTHR) is greater than 12 hours. This data has already been applied at the beginning of the analysis for all rows. 
+
+All 2003-2015 data has been allocated together to build a better prediction model based on variables. First, we filtered out participants between the ages of 18 and 80 in order to make sure adults were measured. 
+
+Because MCQ220 (Cancer or malignancy) is a binary outcome: 1 meaning yes, and 2 meaning no. We replaced instances of 2 with 0. This is also true for other columns which were replaced as well. DIQ10 (Diabetes) had 3 for borderline diabetes, but because this was a lower count, we changed it to 1. With the categorical data organized, we had a better understanding of underlying conditions in relationship to the cancer binary outcome: MCQ220.
+
+It was very important to also exclude the third factor in most of the binary cases: 9 which means "I don't know". There are very few cases of 9 in the dataset so it was excluded in order to improve model performance. CF_data was also rearranged into an easier dataset to process with "Factor" and "Integer" as part of the categorizing and data processing.
+
+# Predictive Model
+
+```{r echo=FALSE, results='hide',message=FALSE}
+library(randomForest)
+library(glmnet)
+library(xgboost)
+library(pROC)
+set.seed(123)
+
+# Random Tree Model
+partion_function<-sample(2,nrow(CF_data),replace= TRUE,prob=c(.8,.2))
+train<-CF_data[partion_function==1,]
+test<-CF_data[partion_function==2, ]
+train <- na.omit(train)
+test <- na.omit(test)
+
+model<-randomForest(train$MCQ220~.,data = train,ntree=300,mtry=3)
+print(model)
+plot(model)
+varImpPlot(model,sort = TRUE,n.var = 10,main = "Top 10 Effects for RF Model")
+
+predictions_rf <- predict(model, newdata = test, type = "prob")
+prob_positive_class <- predictions_rf[, 2]
+
+# LASSO Model
+x_train <- model.matrix(MCQ220 ~ DR1TSUGR + DR1TFIBE + LBXIN + DMDEDUC2, data = train)[,-1]
+y_train <- train$MCQ220
+cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, family = "binomial")
+best_lambda <- cv_lasso$lambda.min
+
+x_test <- model.matrix(MCQ220 ~ DR1TSUGR + DR1TFIBE + LBXIN + DMDEDUC2, data = test)[,-1]
+predictions_lasso <- predict(cv_lasso, newx = x_test, s = best_lambda, type = "response")
+
+# XGBoost Model
+# XGBoost needs 0-based labels
+dtrain <- xgb.DMatrix(data = x_train, label = as.numeric(y_train) - 1)
+params <- list(
+  objective = "binary:logistic",
+  eval_metric = "logloss",
+  max_depth = 6,
+  eta = 0.3
+)
+xgb_model <- xgb.train(params = params, data = dtrain, nrounds = 100)
+
+dtest <- xgb.DMatrix(data = x_test)
+predictions_xgb <- predict(xgb_model, newdata = dtest)
+predictions_xgb_numeric <- as.numeric(predictions_xgb)
+
+# Logistic Regression Model
+logit_model <- glm(MCQ220 ~ DR1TSUGR + DR1TFIBE + LBXIN + DMDEDUC2, family = "binomial", data = train)
+predictions_logit <- predict(logit_model, newdata = test, type = "response")
+
+# Model Evaluations
+roc_rf <- roc(test$MCQ220, prob_positive_class)
+auc_rf <- auc(roc_rf)
+print(paste("Area under the curve for Random Forest:", auc_rf))
+
+roc_lasso <- roc(test$MCQ220, predictions_lasso)
+auc_lasso <- auc(roc_lasso)
+print(paste("Area under the curve for LASSO:", auc_lasso))
+
+roc_xgb <- roc(test$MCQ220, predictions_xgb_numeric)
+auc_xgb <- auc(roc_xgb)
+print(paste("Area under the curve for XGBoost:", auc_xgb))
+
+roc_logit <- roc(test$MCQ220, predictions_logit)
+auc_logit <- auc(roc_logit)
+print(paste("Area under the curve for Logistic Regression:", auc_logit))
+
+auc_scores <- data.frame(
+  Model = c("LASSO", "XGBoost", "Logistic Regression", "Random Forest"),
+  AUC = c(auc_lasso, auc_xgb, auc_logit, auc_rf)
+)
+ggplot(auc_scores, aes(x = Model, y = AUC, fill = Model)) +
+  geom_bar(stat = "identity") +
+  labs(title = "AUC Scores by Model", x = "Model", y = "AUC Score") +
+  geom_text(aes(label = round(AUC, 4)), vjust = 2) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Model Performance Summary
+
+The models we were evaluated based on their ability to predict MCQ220 (indicating whether individuals have been told they had cancer or a malignancy) using various predictors.
+
+Summary of model performances based on the Area Under the Curve (AUC):
+
+-   Random Forest: AUC = 0.605
+
+-   LASSO Regression: AUC = 0.574
+
+-   Logistic Regression: AUC = 0.572
+
+-   XGBoost: AUC = 0.483
+
+Our Random Forest model showed the highest AUC, suggesting it was the most effective at showing the difference between individuals who have been told they had cancer or a malignancy and those who have not, based on the available data. The LASSO and Logistic Regression models demonstrated fair performance, while the XGBoost model was less effective.
+
+The Parameters Impacting MCQ220
+
+-   DR1TSUGR (Total sugars): The total sugar intake of individuals on Day 1 of the nutrition survey after 12 hours of fasting. High sugar intake has been speculated to be associated with an increased risk of certain cancers, possibly due to its impact on obesity, inflammation, and insulin resistance. The importance of this variable in the models may reflect its role in the overall diet and health status of individuals.
+
+-   DR1TFIBE (Dietary fiber): The total fiber intake of individuals on Day 1 of the nutrition survey after 12 hours of fasting. The significance fiber in the models highlights the potential protective role of fiber against cancer. Especially through the tree model where the highest likelyhoods came from sugar then fiber.
+
+-   LBXIN (Insulin level after 12 hours): The baseline insulin of individuals on Day 1 of the nutrition survey after 12 hours of fasting. Insulin levels are linked to obesity and type 2 diabetes, both of which are risk factors for various cancers. High insulin levels might indicate insulin resistance, a condition that has been associated with increased cancer risk. This variable's relevance in the models shows the complex relationship between metabolic health and cancer.
+
+-   DMDEDUC2 (Education level): Education level can be an indicator of socioeconomic status and health literacy, which are factors in health behaviors, access to healthcare, and overall risk exposure. The influence of education level on cancer risk may be mediated through lifestyle choices, awareness, and preventive measures.
+
+The other factors used in the prediction did not seem to have much impact on the final prediction abilities of the model. As noted from the Random Tree model, the highest factors effecting the correct prediction is the use of these factors.
+
+# Discussion
+
+This study leveraged the National Health and Nutrition Examination Survey (NHANES) datasets from 2003 to 2016 to explore the relationships between dietary patterns, insulin levels, and health outcomes, including cardiovascular disease, cancer risk, and diabetes. Our analysis highlighted significant associations between dietary patterns characterized by sugar and fiber intake and insulin levels, further connecting these dietary components to the risk of developing major metabolic diseases like cancer. We used our variables to build a model including fiber intake (gm), sugar intake (gm), insulin levels after 12 hour fasting (uU/mL). These were the strongest variables in finding a good prediction model for MCQ220 (Cancer or malignancy).
+
+## Data Limitations
+
+One of the strengths of the NHANES study is the use of a large, nationally representative dataset, which allows for a comprehensive analysis of dietary patterns and their health implications. However, the reliance on self-reported data for medical conditions and dietary intake introduces reporting biases. The cross-sectional nature of the NHANES dataset limits our ability to infer causality between dietary patterns and health outcomes. This is also set back by the deterministic nature of one day of nutritional data to determine metabolic health outcomes, as there is not enough data to show a general trend of nutritional habits.
+
+## Future Research Directions
+
+Future research would include better modeling with other factors in the dataset for exploration of other variables that could be a good indicator for cancer causing factors. For future research, a good consideration to look into is the rise of insulin levels and how non-sugar carbohydrates play a role into effecting blood insulin.
+
+Lifestyle, socioeconomic, and environmental factors should also be considered for future evaluations and to build a better model. Future factors to look into include: cardiovascular health model and diabetes health model. The analysis should also include alcohol consumption, body mass index, added sugars in relation with other years (to see the trend of the American diet).
+
+# Conclusion
+
+In conclusion, our study shows how dietary consumption can effect metabolic health and development of cancer risk. Our findings highlight the need for continued research and strategies that encourage healthy eating to prevent metabolic diseases. By focusing on dietary improvements, particularly reducing sugar intake and increasing fiber consumption, we can take steps towards changing health outcomes.
+
+# References
+ChatGPT - Assisted with Exploratory Analysis for graphs, Data Integration, Future Research and Handling and Predictive Model coding for all models.
+
+Rippe JM, Angelopoulos TJ. Relationship between Added Sugars Consumption and Chronic Disease Risk Factors: Current Understanding. Nutrients. 2016 Nov 4;8(11):697. doi: 10.3390/nu8110697. PMID: 27827899; PMCID: PMC5133084.
+
+Yang Q, Zhang Z, Gregg EW, Flanders WD, Merritt R, Hu FB. Added sugar intake and cardiovascular diseases mortality among US adults. JAMA Intern Med. 2014 Apr;174(4):516-24. doi: 10.1001/jamainternmed.2013.13563. PMID: 24493081; PMCID: PMC10910551.
